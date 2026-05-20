@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cxs | 前端开发工程师</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <style>
+    /* ===== CSS 变量 ===== */
+    @font-face {
+      font-family: 'KingHwaOldSong';
+      src: url('KingHwaOldSong.woff2') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    :root {
+      --color-bg:    #EFEFEF;
+      --color-gold:  #EBC976;
+      --color-teal:  #6D6D6D;
+      --color-ink:   #2E2E2E;
+      --color-muted: #6B7280;
+      --font-sans:   'Inter', 'Noto Sans SC', sans-serif;
+      --font-song:   'KingHwaOldSong', 'Noto Serif SC', 'SimSun', serif;
+      --radius-xl:   4px;
+      --radius-full: 2px;
+    }
+
+    /* ===== 全局重置 ===== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body, button, input, textarea, select {
+      font-family: var(--font-song);
+      background-color: var(--color-bg);
+      color: var(--color-ink);
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    input::placeholder, textarea::placeholder {
+      font-family: var(--font-song);
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-song);
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    /* ===== 容器 ===== */
+    .container {
+      max-width: 1152px;   /* max-w-6xl ≈ 72rem ≈ 1152px */
+      margin: 0 auto;
+      padding: 0 24px;     /* px-6 */
+    }
+
+    /* ===== 导航栏（fixed）===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      background: rgba(239, 239, 239, 0.9);  /* bg-bg/90 */
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);  /* border-black/5 */
+      transition: box-shadow 0.3s;
+    }
+
+    .navbar.scrolled {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);  /* shadow-md */
+    }
+
+    .navbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;   /* py-4 px-6 */
+    }
+
+    .navbar-logo {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+      min-width: 80px;
+    }
+
+    .navbar-logo span {
+      color: var(--color-gold);
+    }
+
+    /* 桌面导航 */
+    .nav-list {
+      display: flex;
+      gap: 32px;            /* gap-8 */
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-muted);
+    }
+
+    @media (max-width: 767px) {
+      .nav-list { display: none; }
+    }
+
+    /* 导航链接 + 下划线动画 */
+    .nav-link {
+      position: relative;
+      transition: color 0.2s;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--color-gold);
+      transition: width 0.3s;
+    }
+
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: 100%;
+    }
+
+    .nav-link.active {
+      color: var(--color-ink);
+      font-weight: 600;
+    }
+
+    /* 汉堡按钮（移动端）*/
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 6px;             /* gap-1.5 */
+      padding: 4px;         /* p-1 */
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 767px) {
+      .hamburger { display: flex; }
+    }
+
+    .hamburger-line {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--color-ink);
+      transition: all 0.3s;
+    }
+
+    /* 移动端下拉菜单 */
+    #mobile-menu {
+      transition: max-height 0.35s ease, opacity 0.35s ease;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    #mobile-menu.open {
+      max-height: 300px;
+      opacity: 1;
+    }
+
+    .mobile-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-muted);
+    }
+
+    .mobile-nav-list li a {
+      display: block;
+      padding: 8px 0;
+    }
+
+    /* ===== Hero 首页 ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 96px 24px 64px;
+    }
+
+    .hero-content {
+      max-width: 1152px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* 标签芯片 */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(109, 109, 109, 0.2);  /* bg-teal/20 */
+      color: var(--color-teal);
+      font-size: 14px;
+      font-weight: 500;
+      padding: 6px 16px;
+      border-radius: var(--radius-full);
+      margin-bottom: 24px;
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-teal);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* 大标题 */
+    .hero-title {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -0.025em;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .hero-title { font-size: 72px; }  /* md:text-7xl */
+    }
+
+    .hero-title-sub {
+      position: relative;
+      display: inline-block;
+    }
+
+    .hero-title-sub::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: 0;
+      right: 0;
+      height: 8px;
+      background: rgba(235, 201, 118, 0.6);
+      border-radius: 9999px;
+      z-index: -1;
+    }
+
+    /* 副标题 */
+    .hero-subtitle {
+      font-size: 18px;
+      color: var(--color-muted);
+      font-weight: 300;
+      max-width: 576px;    /* max-w-xl */
+      line-height: 1.625;
+      margin-bottom: 32px;
+    }
+
+    @media (min-width: 768px) {
+      .hero-subtitle { font-size: 24px; }  /* md:text-2xl */
+    }
+
+    /* 简介文字 */
+    .hero-desc {
+      font-size: 16px;
+      color: var(--color-muted);
+      max-width: 672px;    /* max-w-2xl */
+      line-height: 1.75;
+      margin-bottom: 40px;
+    }
+
+    /* 按钮组 */
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--color-ink);
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 14px 28px;   /* px-7 py-3.5 */
+      border-radius: var(--radius-full);
+      transition: background-color 0.2s;
+    }
+
+    .btn-primary:hover {
+      background: rgba(46, 46, 46, 0.85);
+    }
+
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 2px solid var(--color-ink);
+      color: var(--color-ink);
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px 28px;
+      border-radius: var(--radius-full);
+      transition: all 0.2s;
+    }
+
+    .btn-outline:hover {
+      background: var(--color-ink);
+      color: #FFFFFF;
+    }
+
+    /* 技术栈 */
+    .skills-section {
+      margin-top: 64px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      color: var(--color-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .skills-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tech-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 12px;    /* px-3 py-1.5 */
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-full);
+      color: var(--color-muted);
+      cursor: default;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .tech-tag:hover {
+      border-color: rgba(109, 109, 109, 0.5);
+      color: var(--color-teal);
+    }
+
+    /* 滚动提示 */
+    .scroll-hint {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--color-muted);
+      font-size: 14px;
+      margin-top: 80px;
+    }
+
+    .scroll-hint-line {
+      width: 1px;
+      height: 32px;
+      background: rgba(107, 114, 128, 0.3);
+    }
+
+    .scroll-hint-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--color-gold);
+    }
+
+    /* ===== 作品页（文件堆叠+抽屉）===== */
+    .works-section {
+      padding: 96px 24px;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .works-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .works-header h2 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .works-header h2 { font-size: 48px; }
+    }
+
+    .works-header p {
+      font-size: 18px;
+      color: var(--color-muted);
+      max-width: 576px;
+      margin: 0 auto;
+    }
+
+    /* 过滤按钮（保持不变）*/
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+
+    .filter-btn {
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 20px;
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      color: var(--color-muted);
+      background: #FFFFFF;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--color-ink);
+      color: var(--color-ink);
+    }
+
+    .filter-btn.active {
+      background: var(--color-ink);
+      color: #FFFFFF;
+      border-color: var(--color-ink);
+    }
+
+    /* ===== 文件列表（纯文字清单，点击展开）===== */
+    .files-grid {
+      max-width: 800px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+
+    /* 文件卡片 */
+    .file-card {
+      border-bottom: 1px dotted rgba(0, 0, 0, 0.2);
+      padding: 24px 0;
+      position: relative;
+      transition: padding 0.25s;
+    }
+
+    .file-card:last-child { border-bottom: none; }
+    .file-card:first-child { padding-top: 0; }
+
+    .file-card.expanded {
+      padding-bottom: 40px;
+    }
+
+    /* 标题条（可点击）*/
+    .file-tab {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .file-folder-tab {
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-muted);
+      flex-shrink: 0;
+    }
+
+    .file-card h3 {
+      font-family: var(--font-song);
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1.3;
+      color: var(--color-ink);
+      transition: color 0.2s;
+      flex: 1;
+      min-width: 0;
+    }
+
+    @media (min-width: 768px) {
+      .file-card h3 { font-size: 36px; }
+    }
+
+    .file-card:hover h3 {
+      color: var(--color-gold);
+    }
+
+    /* 展开/收起 切换按钮（无缝融入文字流）*/
+    .file-toggle-btn {
+      margin-left: auto;
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      position: relative;
+      cursor: pointer;
+      align-self: center;
+    }
+
+    .file-toggle-btn svg {
+      position: absolute;
+      inset: 0;
+      width: 20px;
+      height: 20px;
+      color: var(--color-muted);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+
+    .toggle-arrow {
+      opacity: 0.45;
+    }
+
+    .toggle-x {
+      opacity: 0;
+      transform: scale(0.5) rotate(-90deg);
+    }
+
+    .file-card.expanded .toggle-arrow {
+      opacity: 0;
+      transform: scale(0.5) rotate(90deg);
+    }
+
+    .file-card.expanded .toggle-x {
+      opacity: 0.8;
+      transform: scale(1) rotate(0deg);
+    }
+
+    /* 展开详情区——用 v-show 控制显隐 */
+    .file-expand-wrap {
+      overflow: hidden;
+    }
+
+    .file-expand-inner {
+      padding-top: 20px;
+      position: relative;
+      animation: expandIn 0.3s ease;
+    }
+
+    @keyframes expandIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .file-expand-desc {
+      font-size: 15px;
+      color: var(--color-ink);
+      line-height: 1.75;
+      margin-bottom: 20px;
+      max-width: 680px;
+    }
+
+    .file-expand-tech {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .file-expand-tech-tag {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--color-muted);
+      position: relative;
+    }
+
+    .file-expand-tech-tag + .file-expand-tech-tag {
+      margin-left: 4px;
+      padding-left: 10px;
+      border-left: 1px solid rgba(0, 0, 0, 0.15);
+    }
+
+    .file-expand-github {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-teal);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .file-expand-github:hover {
+      color: var(--color-ink);
+    }
+
+    .file-expand-github.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .file-expand-github-arrow {
+      transition: transform 0.2s;
+    }
+
+    .file-expand-github:hover .file-expand-github-arrow {
+      transform: translateX(4px);
+    }
+
+    /* 空/加载状态 */
+    .state-msg {
+      text-align: center;
+      color: var(--color-muted);
+      padding: 64px 0;
+      font-size: 16px;
+    }
+
+    /* ===== 文件详情全屏展开 ===== */
+    .about-section {
+      padding: 96px 24px;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 64px;
+      align-items: start;
+    }
+
+    @media (min-width: 1024px) {
+      .about-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    .about-section h2 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 768px) {
+      .about-section h2 { font-size: 48px; }
+    }
+
+    .about-text {
+      color: var(--color-muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .about-text p + p {
+      margin-top: 16px;
+    }
+
+    /* 数字成就 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 40px;
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 16px;
+      background: #FFFFFF;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-number {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .stat-number.gold { color: var(--color-gold); }
+    .stat-number.teal { color: var(--color-teal); }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--color-muted);
+      margin-top: 4px;
+    }
+
+    /* 时间线 */
+    .timeline-section h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 32px;
+    }
+
+    .timeline {
+      position: relative;
+    }
+
+    /* 竖线 */
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 6px;
+      top: 12px;
+      bottom: 0;
+      width: 1px;
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    .timeline-item {
+      display: flex;
+      gap: 20px;
+      padding-bottom: 40px;
+    }
+
+    .timeline-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--color-gold);
+      border: 3px solid var(--color-bg);
+      outline: 2px solid var(--color-gold);
+      flex-shrink: 0;
+      margin-top: 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .timeline-content {
+      flex: 1;
+    }
+
+    .timeline-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .timeline-tag {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .tag-gold-bg {
+      background: rgba(235, 201, 118, 0.1);
+      color: #B45309;
+    }
+
+    .tag-ink-bg {
+      background: rgba(46, 46, 46, 0.08);
+      color: var(--color-ink);
+    }
+
+    .tag-gray-bg {
+      background: rgba(0, 0, 0, 0.05);
+      color: var(--color-muted);
+    }
+
+    .timeline-content h4 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .timeline-content p {
+      font-size: 14px;
+      color: var(--color-muted);
+      line-height: 1.625;
+    }
+
+    /* ===== 联系页 ===== */
+    .contact-section {
+      padding: 96px 24px;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .contact-header {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+
+    .contact-header h2 {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .contact-header h2 { font-size: 48px; }
+    }
+
+    .contact-header p {
+      font-size: 18px;
+      color: var(--color-muted);
+      max-width: 576px;
+      margin: 0 auto;
+    }
+
+    .contact-grid {
+      display: flex;
+      justify-content: center;
+    }
+
+    /* 联系信息卡片 */
+
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .contact-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      background: #FFFFFF;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      transition: border-color 0.2s;
+    }
+
+    .contact-card:hover {
+      border-color: rgba(109, 109, 109, 0.4);
+    }
+
+    .contact-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(109, 109, 109, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-teal);
+      flex-shrink: 0;
+    }
+
+    .contact-card-label {
+      font-size: 12px;
+      color: var(--color-muted);
+    }
+
+    .contact-card-value {
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .contact-card:hover .contact-card-value {
+      color: var(--color-teal);
+    }
+
+
+
+
+    /* ===== 页脚 ===== */
+    .footer {
+      padding: 32px 24px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .footer-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      max-width: 1152px;
+      margin: 0 auto;
+      font-size: 14px;
+      color: var(--color-muted);
+    }
+
+    @media (min-width: 768px) {
+      .footer-inner {
+        flex-direction: row;
+      }
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 24px;
+    }
+
+    .footer-links a:hover {
+      color: var(--color-ink);
+    }
+
+    /* ===== 渐入动画 ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+
+    <!-- ===== 导航栏 ===== -->
+    <nav id="navbar" class="navbar" :class="{ scrolled: scrolled }">
+      <div class="navbar-inner">
+        <a href="#home" class="navbar-logo">cxs<span>.</span></a>
+
+        <ul class="nav-list">
+          <li><a href="#home"    class="nav-link" :class="{ active: activeSection === 'home' }">首页</a></li>
+          <li><a href="#works"   class="nav-link" :class="{ active: activeSection === 'works' }">作品</a></li>
+          <li><a href="#about"   class="nav-link" :class="{ active: activeSection === 'about' }">关于</a></li>
+          <li><a href="#contact" class="nav-link" :class="{ active: activeSection === 'contact' }">联系</a></li>
+        </ul>
+
+      <button id="hamburger" class="hamburger" @click="menuOpen = !menuOpen" aria-label="菜单">
+        <span class="hamburger-line" :style="menuOpen ? 'transform: translateY(8px) rotate(45deg)' : ''"></span>
+        <span class="hamburger-line" :style="menuOpen ? 'opacity: 0' : ''"></span>
+        <span class="hamburger-line" :style="menuOpen ? 'transform: translateY(-8px) rotate(-45deg); width: 24px' : 'width: 16px'"></span>
+      </button>
+    </div>
+
+    <div id="mobile-menu" :class="{ open: menuOpen }">
+      <ul class="mobile-nav-list">
+        <li><a href="#home"    class="nav-link" @click="menuOpen = false">首页</a></li>
+        <li><a href="#works"   class="nav-link" @click="menuOpen = false">作品</a></li>
+        <li><a href="#about"   class="nav-link" @click="menuOpen = false">关于</a></li>
+        <li><a href="#contact" class="nav-link" @click="menuOpen = false">联系</a></li>
+      </ul>
+    </div>
+  </nav>
+
+
+  <!-- ===== Hero 首页 ===== -->
+  <section id="home" class="hero">
+    <div class="hero-content">
+
+      <div class="fade-in">
+        <span class="badge">
+          <span class="badge-dot"></span>
+          求职中
+        </span>
+      </div>
+
+      <h1 class="hero-title fade-in">
+        你好，我是
+        <span class="hero-title-sub">cxs</span>
+      </h1>
+
+      <p class="hero-subtitle fade-in">
+        前端开发工程师 &amp; 数据分析爱好者<br />
+        <strong style="color: var(--color-ink); font-weight: 500;">专注于构建美观、高效的 Web 应用</strong>
+      </p>
+
+      <p class="hero-desc fade-in">
+        拥有 3 年前端开发经验，熟练掌握 Vue.js、React、TypeScript，同时具备数据分析能力（Python / SQL / Tableau）。
+        热衷于将复杂数据转化为直观的可视化界面，帮助团队做出更好的决策。
+      </p>
+
+      <div class="btn-group fade-in">
+        <a href="#works" class="btn-primary">
+          查看作品
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </a>
+        <a href="#contact" class="btn-outline">联系我</a>
+      </div>
+
+      <div class="skills-section fade-in">
+        <p class="section-label">技术栈</p>
+        <div class="skills-list">
+          <span v-for="tag in skills" :key="tag" class="tech-tag">{{ tag }}</span>
+        </div>
+      </div>
+
+      <div class="scroll-hint fade-in">
+        <div>
+          <div class="scroll-hint-line"></div>
+          <div class="scroll-hint-dot"></div>
+        </div>
+        向下滚动探索更多
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ===== 作品集 ===== -->
+  <section id="works" class="works-section">
+    <div class="container">
+
+      <div class="works-header fade-in">
+        <p class="section-label">Portfolio</p>
+        <h2>我的作品集</h2>
+        <p>每一个项目都是一次思考与创造，以下是部分代表作。</p>
+      </div>
+
+      <!-- 过滤按钮 -->
+      <div class="filter-bar fade-in">
+        <button
+          v-for="btn in filterButtons"
+          :key="btn.value"
+          class="filter-btn"
+          :class="{ active: currentCategory === btn.value }"
+          @click="setCategory(btn.value)"
+        >{{ btn.label }}</button>
+      </div>
+
+      <!-- 加载中 -->
+      <p v-if="loading" class="state-msg">加载中...</p>
+
+      <!-- 空状态 -->
+      <p v-else-if="filteredProjects.length === 0" class="state-msg">暂无相关作品</p>
+
+      <!-- 文件列表（点击展开）-->
+      <div v-else class="files-grid">
+        <div
+          v-for="project in filteredProjects"
+          :key="project.id"
+          class="file-card"
+          :class="{ expanded: expandedId === project.id }"
+        >
+          <!-- 标题条（始终可见，点击展开/收起）-->
+          <div class="file-tab" @click.stop="toggleExpand(project.id)">
+            <span class="file-folder-tab">
+              {{ project.category === 'data' ? '数据分析' : project.category === 'frontend' ? '前端开发' : '其他项目' }}
+            </span>
+            <h3>{{ project.title }}</h3>
+            <!-- 切换按钮：箭头 ⇄ X -->
+            <span class="file-toggle-btn">
+              <svg class="toggle-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M6 9l6 6 6-6"/>
+              </svg>
+              <svg class="toggle-x" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </span>
+          </div>
+
+          <!-- 展开详情区 -->
+          <div v-show="expandedId === project.id" class="file-expand-wrap">
+            <div class="file-expand-inner">
+              <p class="file-expand-desc">{{ project.description }}</p>
+
+              <div class="file-expand-tech">
+                <span
+                  v-for="tech in project.technologies"
+                  :key="tech"
+                  class="file-expand-tech-tag"
+                >{{ tech }}</span>
+              </div>
+
+              <a
+                :href="project.githubUrl && project.githubUrl !== '#' ? project.githubUrl : '#'"
+                :target="project.githubUrl && project.githubUrl !== '#' ? '_blank' : '_self'"
+                class="file-expand-github"
+                :class="{ disabled: !project.githubUrl || project.githubUrl === '#' }"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+                </svg>
+                查看 GitHub 项目
+                <svg class="file-expand-github-arrow" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ===== 关于页 ===== -->
+  <section id="about" class="about-section">
+    <div class="container">
+      <div class="about-grid">
+
+        <!-- 左 -->
+        <div>
+          <div class="fade-in">
+            <p class="section-label">About Me</p>
+            <h2>关于我</h2>
+          </div>
+
+          <div class="about-text fade-in">
+            <p>我是 cxs，一名热爱创造的前端开发工程师，同时对数据充满热情。毕业于华南农业大学计算机科学专业，专注于构建性能优越、用户体验极佳的 Web 应用。</p>
+            <p>工作之余，我喜欢钻研新技术、撰写技术博客，并参与开源项目贡献。我相信优秀的代码不仅要能运行，更要能被读懂、被维护。</p>
+            <p>目前我正在寻找前端开发或数据分析相关岗位，期待能加入一个充满活力的团队，共同创造有价值的产品。</p>
+          </div>
+
+          <div class="stats-grid fade-in">
+            <div class="stat-card">
+              <p class="stat-number gold">3+</p>
+              <p class="stat-label">年开发经验</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-number teal">12+</p>
+              <p class="stat-label">完成项目</p>
+            </div>
+            <div class="stat-card">
+              <p class="stat-number">500+</p>
+              <p class="stat-label">GitHub Stars</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右：时间线 -->
+        <div class="timeline-section fade-in">
+          <h3>个人经历</h3>
+
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-tags">
+                  <span class="timeline-tag tag-gold-bg">2025.11 — 2026.04</span>
+                </div>
+                <h4>毕业论文：广东省乡村振兴绩效评价</h4>
+                <p>基于CRITIC-TOPSIS模型对20个地市进行绩效评价，构建5维度16指标体系，含空间自相关分析。</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-tags">
+                  <span class="timeline-tag tag-ink-bg">2025.05 — 2025.06</span>
+                </div>
+                <h4>教师个人主页论文管理系统 · 组长</h4>
+                <p>负责数据库设计、检索逻辑与数据看板，Spring Boot + MySQL + ECharts，完成论文上传下载与多维度检索。</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-tags">
+                  <span class="timeline-tag tag-gold-bg">2024.09</span>
+                </div>
+                <h4>全国大学生数学建模竞赛 · 省级三等奖 · 队长</h4>
+                <p>舞龙路径优化问题，约束满足模型+二分法求解，C++计算+Python可视化，74小时完成交付。</p>
+              </div>
+            </div>
+
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div class="timeline-content">
+                <div class="timeline-tags">
+                  <span class="timeline-tag tag-ink-bg">2019.09 — 2026.07</span>
+                </div>
+                <h4>信息与计算科学 · 本科</h4>
+                <p>华南农业大学，GPA 4.17 / 5.0（前15%），CET-6 504，核心课程包括数据结构、数据库、Java程序设计等。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== 联系页 ===== -->
+  <section id="contact" class="contact-section">
+    <div class="contact-header fade-in">
+      <p class="section-label">Contact</p>
+      <h2>联系我</h2>
+      <p>无论是工作机会、项目合作还是技术探讨，我都欢迎你的来信</p>
+    </div>
+
+      <div class="contact-grid">
+        <div class="contact-info fade-in">
+        <div class="contact-list">
+          <a href="mailto:cxs@example.com" class="contact-card">
+            <div class="contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <rect width="20" height="16" x="2" y="4" rx="2"/>
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+              </svg>
+            </div>
+            <div>
+              <p class="contact-card-label">邮箱</p>
+              <p class="contact-card-value">cxs@example.com</p>
+            </div>
+          </a>
+
+          <a href="tel:+8613800000000" class="contact-card">
+            <div class="contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.82a16 16 0 0 0 6.29 6.29l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="contact-card-label">电话</p>
+              <p class="contact-card-value">138-0000-0000</p>
+            </div>
+          </a>
+
+          <a href="https://github.com/cxs" target="_blank" class="contact-card">
+            <div class="contact-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+              </svg>
+            </div>
+            <div>
+              <p class="contact-card-label">GitHub</p>
+              <p class="contact-card-value">github.com/cxs</p>
+            </div>
+          </a>
+
+        </div>
+        </div>
+        </div>
+    </section>
+
+    </div>
+
+  <!-- ===== 页脚 ===== -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <p>© 2026 cxs. 保留所有权利.</p>
+      <div class="footer-links">
+        <a href="#home">首页</a>
+        <a href="#works">作品</a>
+        <a href="#about">关于</a>
+        <a href="#contact">联系</a>
+      </div>
+      <p>用心与代码构建</p>
+    </div>
+  </footer>
+
+  <!-- ===== Vue 3 应用 ===== -->
+  <script>
+    const { createApp, ref, computed, onMounted, onUnmounted, nextTick, watch } = Vue;
+
+    createApp({
+      setup() {
+        const API_BASE = 'http://localhost:8080/api';
+
+        // ============================================
+        //  1. 导航状态
+        // ============================================
+        const scrolled      = ref(false);
+        const activeSection = ref('home');
+        const menuOpen      = ref(false);
+
+        // ============================================
+        //  2. 过滤功能
+        // ============================================
+        /** 技术栈列表（主页展示）*/
+        const skills = [
+          'Vue.js', 'React', 'TypeScript', 'CSS3',
+          'Python', 'SQL', 'ECharts', 'Spring Boot'
+        ];
+
+        const filterButtons = [
+          { label: '全部',     value: 'all' },
+          { label: '前端开发', value: 'frontend' },
+          { label: '数据分析', value: 'data' },
+        ];
+        const currentCategory = ref('all');
+
+        function setCategory(cat) {
+          currentCategory.value = cat;
+        }
+
+        // ============================================
+        //  3. 作品数据（支持从 API 加载 / 本地兜底）
+        // ============================================
+        const projects = ref([]);
+        const loading  = ref(false);
+
+        /** 筛选后的作品列表 */
+        const filteredProjects = computed(() => {
+          const cat = currentCategory.value;
+          if (cat === 'all') return projects.value;
+          return projects.value.filter(p => p.category === cat);
+        });
+
+        /** 视差动画监听列表变化 */
+        watch(filteredProjects, () => {
+          nextTick(() => initFadeObserver());
+        }, { flush: 'post' });
+
+        /** 展开状态 */
+        const expandedId = ref(null);
+
+        function toggleExpand(id) {
+          expandedId.value = expandedId.value === id ? null : id;
+        }
+
+        // ============================================
+        //  4. 🗂️ 项目数据（在此添加/修改项目）
+        // ============================================
+        //  字段说明：
+        //    id          - 唯一标识
+        //    title       - 项目名称
+        //    description - 项目简介
+        //    imageUrl    - 配图链接（可选）
+        //    githubUrl   - GitHub 仓库链接（# 表示无链接）
+        //    category    - 'data' 数据分析 / 'frontend' 前端开发
+        //    technologies- 技术栈数组
+        // ============================================
+        const FALLBACK_PROJECTS = [
+          {
+            id: 1,
+            title: '「闪读」App 用户时长下滑分析',
+            description: '5000万MAU小说App时长下跌归因分析，AARRR框架+用户生命周期模型，SQL实现路径归因与策略闭环。',
+            imageUrl: 'https://placehold.co/600x400/72BFCC/FFFFFF?text=ShandU',
+            githubUrl: '#',
+            category: 'data',
+            technologies: ['SQL', 'AARRR模型', '用户生命周期', '指标拆解'],
+          },
+          {
+            id: 2,
+            title: '「知味」App 商业化增长分析',
+            description: '美食UGC社区GMV增长乏力归因，定位流量分发效率问题与标签污染，策略设计含推流券机制。',
+            imageUrl: 'https://placehold.co/600x400/EBC976/FFFFFF?text=Zhiwei',
+            githubUrl: '#',
+            category: 'data',
+            technologies: ['SQL', 'AARRR模型', '因果推断', '策略设计'],
+          },
+          {
+            id: 3,
+            title: '广东省乡村振兴绩效评价分析',
+            description: 'CRITIC-TOPSIS模型+空间自相关分析，20个地市面板数据，构建5维度16指标评价体系。',
+            imageUrl: 'https://placehold.co/600x400/1E1E1E/EFEFEF?text=Rural',
+            githubUrl: '#',
+            category: 'data',
+            technologies: ['Python', 'MySQL', 'CRITIC-TOPSIS', '空间分析'],
+          },
+          {
+            id: 4,
+            title: '教师个人主页论文管理系统',
+            description: '论文上传下载、PDF校验、多维度检索与数据看板，支持下载趋势分析与热门论文排行。',
+            imageUrl: 'https://placehold.co/600x400/72BFCC/FFFFFF?text=Paper',
+            githubUrl: '#',
+            category: 'frontend',
+            technologies: ['Spring Boot', 'MySQL', 'Thymeleaf', 'ECharts'],
+          },
+          {
+            id: 5,
+            title: '全国大学生数学建模竞赛',
+            description: '省级三等奖。舞龙路径优化问题，约束满足模型+二分法求解，C++计算+Python可视化。',
+            imageUrl: 'https://placehold.co/600x400/1E1E1E/EFEFEF?text=Math',
+            githubUrl: '#',
+            category: 'data',
+            technologies: ['C++', 'Python', 'Matplotlib', '数学建模'],
+          },
+          {
+            id: 6,
+            title: '学生课程管理系统',
+            description: '选课、成绩查询、试卷管理，15张数据库表设计与SQL优化，支持三角色权限控制。',
+            imageUrl: 'https://placehold.co/600x400/EBC976/FFFFFF?text=Course',
+            githubUrl: '#',
+            category: 'frontend',
+            technologies: ['Spring Boot', 'MyBatis', 'MySQL', 'Token鉴权'],
+          },
+        ];
+
+        /** 从 API 获取项目，失败则使用本地兜底数据 */
+        async function fetchProjects() {
+          if (projects.value.length > 0) return;
+
+          loading.value = true;
+          try {
+            const res  = await fetch(`${API_BASE}/projects`);
+            const json = await res.json();
+
+            if (json.success && json.data && json.data.length > 0) {
+              projects.value = json.data.map(p => ({
+                ...p,
+                technologies: Array.isArray(p.technologies)
+                  ? p.technologies
+                  : p.technologies
+                    ? [p.technologies]
+                    : [],
+              }));
+            } else {
+              projects.value = FALLBACK_PROJECTS;
+            }
+          } catch {
+            projects.value = FALLBACK_PROJECTS;
+          } finally {
+            loading.value = false;
+            nextTick(() => initFadeObserver());
+          }
+        }
+
+        // ============================================
+        //  5. 滚动监听
+        // ============================================
+        /** 高亮当前可见的导航 section */
+        function onScroll() {
+          scrolled.value = window.scrollY > 20;
+
+          const sections = document.querySelectorAll('section[id]');
+          let current = '';
+          sections.forEach(section => {
+            if (window.scrollY >= section.offsetTop - 120) {
+              current = section.id;
+            }
+          });
+          if (current) activeSection.value = current;
+        }
+
+        // ============================================
+        //  6. 动画 & 交互
+        // ============================================
+        let observer = null;
+
+        /** 淡入动画 - IntersectionObserver */
+        function initFadeObserver() {
+          if (observer) observer.disconnect();
+
+          observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+              if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                observer.unobserve(e.target);
+              }
+            });
+          }, { threshold: 0.12 });
+
+          document.querySelectorAll('.fade-in:not(.visible)')
+            .forEach(el => observer.observe(el));
+        }
+
+        /** 平滑滚动锚点 */
+        function initSmoothScroll() {
+          document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+              const target = document.querySelector(this.getAttribute('href'));
+              if (target) {
+                e.preventDefault();
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            });
+          });
+        }
+
+        // ============================================
+        //  7. 生命周期
+        // ============================================
+        onMounted(() => {
+          window.addEventListener('scroll', onScroll);
+          initFadeObserver();
+          initSmoothScroll();
+          fetchProjects();
+        });
+
+        onUnmounted(() => {
+          window.removeEventListener('scroll', onScroll);
+          if (observer) observer.disconnect();
+        });
+
+        // ============================================
+        //  return — 暴露给模板的数据和方法
+        // ============================================
+        return {
+          // 导航
+          scrolled, activeSection, menuOpen,
+
+          // 过滤
+          skills, filterButtons, currentCategory,
+          setCategory,
+
+          // 作品
+          projects, loading,
+          filteredProjects,
+          expandedId, toggleExpand,
+        };
+      },
+    }).mount('#app');
+  </script>
+
+</body>
+</html>
