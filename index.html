@@ -1079,7 +1079,7 @@
           <!-- 标题条（始终可见，点击展开/收起）-->
           <div class="file-tab" @click.stop="toggleExpand(project.id)">
             <span class="file-folder-tab">
-              {{ project.category === 'data' ? '数据分析' : project.category === 'frontend' ? '前端开发' : '其他项目' }}
+              {{ project.category === 'data' ? '数据分析' : project.category === 'frontend' ? '前端开发' : project.category === 'product' ? '产品相关' : '其他项目' }}
             </span>
             <h3>{{ project.title }}</h3>
             <!-- 切换按钮：箭头 ⇄ X -->
@@ -1353,6 +1353,7 @@
           { label: '全部',     value: 'all' },
           { label: '前端开发', value: 'frontend' },
           { label: '数据分析', value: 'data' },
+          { label: '产品相关', value: 'product' },
         ];
         const currentCategory = ref('all');
 
@@ -1451,6 +1452,14 @@
             category: 'frontend',
             technologies: ['Spring Boot', 'MyBatis', 'MySQL', 'Token鉴权'],
           },
+          {
+            id: 7,
+            title: '学生请假管理系统需求分析',
+            description: '学生请假管理系统PRD撰写、可行性分析报告撰写，含功能/非功能需求、数据词典、E-R图',
+            githubUrl: '#',
+            category: 'product',
+            technologies: ['功能需求','数据词典','E-R图','流程图','Visio','数据流图']
+          }
         ];
 
         /** 从 API 获取项目，失败则使用本地兜底数据 */
